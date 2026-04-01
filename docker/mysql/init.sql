@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS ipam_auth CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS ipam_ip CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS ipam_gateway CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+GRANT ALL PRIVILEGES ON ipam_auth.* TO 'ipam'@'%';
+GRANT ALL PRIVILEGES ON ipam_ip.* TO 'ipam'@'%';
+GRANT ALL PRIVILEGES ON ipam_gateway.* TO 'ipam'@'%';
+
+FLUSH PRIVILEGES;

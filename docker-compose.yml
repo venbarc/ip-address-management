@@ -1,0 +1,128 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: ipam
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usecret", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_KEY: base64:QP5RIW8VdQcMHTsgzYJaTtnYqXvdfxGoQH6qmY0VpUs=
+      APP_URL: http://localhost:8001
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ipam_auth
+      DB_USERNAME: ipam
+      DB_PASSWORD: secret
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-secret}
+      JWT_TTL_MINUTES: ${JWT_TTL_MINUTES:-15}
+      REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-7}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-replace-with-shared-secret}
+    ports:
+      - "8001:8000"
+    networks:
+      - internal
+
+  ip-service:
+    build:
+      context: ./services/ip-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_KEY: base64:YourIpServiceKeyHereReplaceThis12345678901234=
+      APP_URL: http://localhost:8002
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ipam_ip
+      DB_USERNAME: ipam
+      DB_PASSWORD: secret
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-replace-with-shared-secret}
+    ports:
+      - "8002:8000"
+    networks:
+      - internal
+
+  gateway:
+    build:
+      context: ./services/gateway
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      ip-service:
+        condition: service_started
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_KEY: base64:YourGatewayKeyHereReplaceThis1234567890123456=
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ipam_gateway
+      DB_USERNAME: ipam
+      DB_PASSWORD: secret
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-replace-with-shared-secret}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      IP_SERVICE_URL: http://ip-service:8000
+      UPSTREAM_TIMEOUT_SECONDS: 10
+    ports:
+      - "8000:8000"
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000/api
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    networks:
+      - internal
+
+volumes:
+  mysql_data:
+
+networks:
+  internal:
+    driver: bridge

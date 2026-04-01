@@ -1,0 +1,11 @@
+# Root secrets — never commit
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.suo
+*.user
