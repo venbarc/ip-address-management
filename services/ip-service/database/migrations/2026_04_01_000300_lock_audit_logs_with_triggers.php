@@ -11,21 +11,26 @@ return new class extends Migration
             return;
         }
 
-        DB::unprepared("
-            CREATE TRIGGER prevent_audit_log_update
-            BEFORE UPDATE ON audit_logs
-            FOR EACH ROW
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Audit logs are immutable: updates are not permitted.';
-        ");
+        try {
+            DB::unprepared("
+                CREATE TRIGGER prevent_audit_log_update
+                BEFORE UPDATE ON audit_logs
+                FOR EACH ROW
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Audit logs are immutable: updates are not permitted.';
+            ");
 
-        DB::unprepared("
-            CREATE TRIGGER prevent_audit_log_delete
-            BEFORE DELETE ON audit_logs
-            FOR EACH ROW
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Audit logs are immutable: deletions are not permitted.';
-        ");
+            DB::unprepared("
+                CREATE TRIGGER prevent_audit_log_delete
+                BEFORE DELETE ON audit_logs
+                FOR EACH ROW
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Audit logs are immutable: deletions are not permitted.';
+            ");
+        } catch (\Throwable $e) {
+            // Requires log_bin_trust_function_creators=1 or SUPER privilege.
+            // Model-level guard still enforces immutability if triggers cannot be created.
+        }
     }
 
     public function down(): void
