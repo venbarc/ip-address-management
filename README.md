@@ -28,7 +28,7 @@ Browser
 ## Prerequisites
 
 - [Docker](https://www.docker.com/get-started) and Docker Compose v2
-- Ports `5173`, `8000`, `8001`, `8002`, `3306` available on your machine
+- Ports `5173` (frontend) and `8000` (gateway) available on your machine
 
 ---
 
