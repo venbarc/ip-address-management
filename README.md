@@ -169,10 +169,10 @@ Visit [http://localhost:5173](http://localhost:5173)
 ## Features
 
 - **Authentication** — JWT-based login with automatic token refresh
-- **IP Management** — Add, edit IPv4/IPv6 addresses with labels and optional comments
+- **IP Management** — Add IPv4/IPv6 addresses with a label and optional comment; the IP address field itself is immutable after creation — only the label and comment metadata can be edited
 - **Role-based access** — Regular users manage their own records; super-admins manage all
-- **Immutable audit logs** — Every change, login, and logout is permanently recorded
-- **Audit Dashboard** — Super-admin exclusive view of all system events with filters
+- **Immutable audit logs** — Every change, login, and logout is permanently recorded; enforced at the Laravel model level and backed by MySQL `BEFORE UPDATE / BEFORE DELETE` triggers on the `audit_logs` tables
+- **Audit Dashboard** — Super-admin exclusive view of all system events with filters (session ID, event name, user ID, IP record ID)
 - **Distributed tracing** — Correlation IDs across all services
 
 ---

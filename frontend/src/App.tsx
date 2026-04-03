@@ -982,7 +982,7 @@ function App() {
                           session_uuid: event.target.value,
                         }))
                       }
-                      placeholder="Partial match is okay"
+                      placeholder="Partial UUID match — e.g. 01jqz"
                     />
                   </label>
                   <label className="audit-form-field">
@@ -996,13 +996,14 @@ function App() {
                           event: event.target.value,
                         }))
                       }
-                      placeholder="auth.login or ip.updated"
+                      placeholder="e.g. auth.login, ip.created, ip.deleted"
                     />
                   </label>
                   <label className="audit-form-field">
-                    <span>User ID</span>
+                    <span>User ID (numeric)</span>
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={auditFilters.actor_user_id}
                       onChange={(event) =>
                         setAuditFilters((current) => ({
@@ -1010,11 +1011,11 @@ function App() {
                           actor_user_id: event.target.value,
                         }))
                       }
-                      placeholder="Filter by user lifetime activity"
+                      placeholder="e.g. 1 — all events by that user"
                     />
                   </label>
                   <label className="audit-form-field">
-                    <span>IP Record ID</span>
+                    <span>IP Record ID (ULID)</span>
                     <input
                       type="text"
                       value={auditFilters.subject_id}
@@ -1024,7 +1025,7 @@ function App() {
                           subject_id: event.target.value,
                         }))
                       }
-                      placeholder="Filter by IP address lifetime activity"
+                      placeholder="Full or partial ULID of an IP record"
                     />
                   </label>
                 </div>
@@ -1049,10 +1050,8 @@ function App() {
               </form>
 
               <div className="audit-guide">
-                <span className="audit-guide-chip">Session ID accepts partial text</span>
-                <span className="audit-guide-chip">
-                  Event examples: auth.login, ip.created, ip.deleted
-                </span>
+                <span className="audit-guide-chip">Session ID and IP Record ID accept partial matches</span>
+                <span className="audit-guide-chip">User ID is the numeric database ID shown in the record owner column</span>
               </div>
 
               <div className="audit-list">
@@ -1331,15 +1330,23 @@ function AuditSummaryCard(props: {
 }
 
 function AuditTimelineItem({ event }: { event: AuditEvent }) {
+  const role = event.actor_role ?? 'system'
+  const roleClass =
+    role === 'super-admin' ? 'audit-item-super-admin' : 'audit-item-user'
+
   return (
-    <article className="audit-item">
+    <article className={`audit-item ${roleClass}`}>
       <div className="audit-item-top">
-        <div>
+        <div className="audit-item-who">
           <p className="audit-event-name">{event.event}</p>
-          <small className="audit-meta-line">
-            {event.actor_name || 'System'} | {event.actor_role || 'n/a'} |{' '}
-            {formatTimestamp(event.occurred_at)}
-          </small>
+          <div className="audit-meta-row">
+            <span className={`audit-role-badge audit-role-badge-${role === 'super-admin' ? 'admin' : 'user'}`}>
+              {role === 'super-admin' ? 'Super Admin' : role === 'user' ? 'User' : 'System'}
+            </span>
+            <small className="audit-meta-line">
+              {event.actor_name || 'System'} — {formatTimestamp(event.occurred_at)}
+            </small>
+          </div>
         </div>
         <span className="inline-pill">{humanizeSubjectType(event.subject_type)}</span>
       </div>
