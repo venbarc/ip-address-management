@@ -8,20 +8,20 @@ A web-based IP Address Management (IPAM) solution built with a microservices arc
 
 ```
 Browser
-  └── Frontend (React + TypeScript)
-        └── Gateway Service (Laravel)          :8000
-              ├── Auth Service (Laravel)        :8001  (internal only)
-              └── IP Service (Laravel)          :8002  (internal only)
-                    └── MySQL                   :3306
+  └── Frontend (React + TypeScript)      host :5173
+        └── Gateway Service (Laravel)    host :8000
+              ├── Auth Service (Laravel) internal (auth-service:8000)
+              └── IP Service (Laravel)   internal (ip-service:8000)
+                    └── MySQL            internal :3306
 ```
 
 | Service | Role | Port |
 |---|---|---|
-| `frontend` | React + Vite UI | 5173 |
-| `gateway` | API gateway, auth enforcement, request routing | 8000 |
-| `auth-service` | JWT issuance, token refresh, session management | 8001 (internal) |
-| `ip-service` | IP address CRUD, role-based authorization, audit logs | 8002 (internal) |
-| `mysql` | Shared database host — 3 independent databases | 3306 (internal) |
+| `frontend` | React + Vite UI | **5173** (host) |
+| `gateway` | API gateway, auth enforcement, request routing | **8000** (host) |
+| `auth-service` | JWT issuance, token refresh, session management | internal only |
+| `ip-service` | IP address CRUD, role-based authorization, audit logs | internal only |
+| `mysql` | Shared database host — 3 independent databases | internal only |
 
 ---
 
