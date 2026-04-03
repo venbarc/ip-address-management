@@ -108,6 +108,8 @@ export interface AuditDashboard {
 export interface AuditFilters {
   session_uuid: string
   event: string
+  actor_user_id: string
+  subject_id: string
 }
 
 export interface ApiEnvelope<T> {

@@ -49,6 +49,8 @@ const emptyRecordForm: IpAddressInput = {
 const emptyAuditFilters: AuditFilters = {
   session_uuid: '',
   event: '',
+  actor_user_id: '',
+  subject_id: '',
 }
 
 const exitAnimationDuration = 220
@@ -995,6 +997,34 @@ function App() {
                         }))
                       }
                       placeholder="auth.login or ip.updated"
+                    />
+                  </label>
+                  <label className="audit-form-field">
+                    <span>User ID</span>
+                    <input
+                      type="text"
+                      value={auditFilters.actor_user_id}
+                      onChange={(event) =>
+                        setAuditFilters((current) => ({
+                          ...current,
+                          actor_user_id: event.target.value,
+                        }))
+                      }
+                      placeholder="Filter by user lifetime activity"
+                    />
+                  </label>
+                  <label className="audit-form-field">
+                    <span>IP Record ID</span>
+                    <input
+                      type="text"
+                      value={auditFilters.subject_id}
+                      onChange={(event) =>
+                        setAuditFilters((current) => ({
+                          ...current,
+                          subject_id: event.target.value,
+                        }))
+                      }
+                      placeholder="Filter by IP address lifetime activity"
                     />
                   </label>
                 </div>

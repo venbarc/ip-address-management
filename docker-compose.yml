@@ -43,8 +43,6 @@ services:
       JWT_TTL_MINUTES: ${JWT_TTL_MINUTES:-15}
       REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-7}
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-replace-with-shared-secret}
-    ports:
-      - "8001:8000"
     networks:
       - internal
 
@@ -70,8 +68,6 @@ services:
       SESSION_DRIVER: database
       QUEUE_CONNECTION: database
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-replace-with-shared-secret}
-    ports:
-      - "8002:8000"
     networks:
       - internal
 
