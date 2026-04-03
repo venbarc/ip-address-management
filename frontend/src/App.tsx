@@ -1195,21 +1195,19 @@ function ShieldMark() {
       fill="none"
       aria-hidden="true"
     >
-      <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#shield-fill)" />
       <path
-        d="M24 13L32 16.2V22.8C32 28.2 28.4 32.9 24 34.6C19.6 32.9 16 28.2 16 22.8V16.2L24 13Z"
-        fill="#0F5FC6"
+        d="M24 6L38 11V22C38 31 31.5 38.5 24 41C16.5 38.5 10 31 10 22V11L24 6Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
       <path
-        d="M24 19.1C25.3 17.5 28 18.1 28 20.5C28 23.2 24.9 24.8 24 26C23.1 24.8 20 23.2 20 20.5C20 18.1 22.7 17.5 24 19.1Z"
-        fill="white"
+        d="M18 23L22 27L30 19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <defs>
-        <linearGradient id="shield-fill" x1="6" y1="6" x2="42" y2="42">
-          <stop stopColor="#F3F7FC" />
-          <stop offset="1" stopColor="#E6EDF7" />
-        </linearGradient>
-      </defs>
     </svg>
   )
 }
