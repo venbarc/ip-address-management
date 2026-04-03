@@ -92,14 +92,13 @@ function App() {
 
   const [newlyAddedIds, setNewlyAddedIds] = useState<string[]>([])
   const [removingIds, setRemovingIds] = useState<string[]>([])
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const [recordsPage, setRecordsPage] = useState(1)
   const [auditPage, setAuditPage] = useState(1)
 
   const deferredSearch = useDeferredValue(search)
   const superAdmin = profile?.user.role === 'super-admin'
-  const loadingWorkspace = booting || refreshPending || isPending
   const hasActiveAuditFilters = Object.values(auditFilters).some(
     (value) => value.trim().length > 0,
   )
@@ -719,7 +718,6 @@ function App() {
                     operational note.
                   </p>
                 </div>
-                {loadingWorkspace ? <span className="status-pill">Syncing</span> : null}
               </div>
 
               <form className="form-stack composer-form" onSubmit={handleCreateRecord}>
