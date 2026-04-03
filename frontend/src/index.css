@@ -1370,6 +1370,46 @@ textarea:focus {
   font-size: 0.78rem;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 0 2px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+}
+
+.pagination-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  transition: background-color 100ms ease, border-color 100ms ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: var(--line-strong);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pagination-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-width: 48px;
+  text-align: center;
+}
+
 .button-inner {
   justify-content: center;
   align-items: center;

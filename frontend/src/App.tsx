@@ -55,6 +55,8 @@ const emptyAuditFilters: AuditFilters = {
 
 const exitAnimationDuration = 220
 const entryAnimationDuration = 1800
+const RECORDS_PER_PAGE = 5
+const AUDIT_PER_PAGE = 5
 
 function App() {
   const [booting, setBooting] = useState(true)
@@ -91,6 +93,9 @@ function App() {
   const [newlyAddedIds, setNewlyAddedIds] = useState<string[]>([])
   const [removingIds, setRemovingIds] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
+
+  const [recordsPage, setRecordsPage] = useState(1)
+  const [auditPage, setAuditPage] = useState(1)
 
   const deferredSearch = useDeferredValue(search)
   const superAdmin = profile?.user.role === 'super-admin'
@@ -140,6 +145,21 @@ function App() {
 
       return haystack.includes(deferredSearch.trim().toLowerCase())
     })
+
+  const totalRecordPages = Math.max(1, Math.ceil(filteredRecords.length / RECORDS_PER_PAGE))
+  const safeRecordsPage = Math.min(recordsPage, totalRecordPages)
+  const paginatedRecords = filteredRecords.slice(
+    (safeRecordsPage - 1) * RECORDS_PER_PAGE,
+    safeRecordsPage * RECORDS_PER_PAGE,
+  )
+
+  const auditEvents = dashboard?.events ?? []
+  const totalAuditPages = Math.max(1, Math.ceil(auditEvents.length / AUDIT_PER_PAGE))
+  const safeAuditPage = Math.min(auditPage, totalAuditPages)
+  const paginatedAuditEvents = auditEvents.slice(
+    (safeAuditPage - 1) * AUDIT_PER_PAGE,
+    safeAuditPage * AUDIT_PER_PAGE,
+  )
 
   useEffect(() => {
     let active = true
@@ -448,6 +468,7 @@ function App() {
 
     try {
       await syncAudit(auditFilters)
+      setAuditPage(1)
       pushToast('Audit refreshed', 'neutral', 'Dashboard filters have been applied.')
     } catch (error) {
       pushToast('Audit refresh failed', 'error', getErrorMessage(error))
@@ -465,6 +486,7 @@ function App() {
       })
 
       await syncAudit(emptyAuditFilters)
+      setAuditPage(1)
       pushToast('Filters cleared', 'neutral', 'Showing the full audit history again.')
     } catch (error) {
       pushToast('Could not reset filters', 'error', getErrorMessage(error))
@@ -784,7 +806,10 @@ function App() {
                     className="search-field inventory-search-input"
                     type="search"
                     value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) => {
+                      setSearch(event.target.value)
+                      setRecordsPage(1)
+                    }}
                     placeholder="Search IP, label, owner, or comment"
                   />
                 </label>
@@ -803,7 +828,7 @@ function App() {
                 <button
                   className={`filter-chip ${inventoryView === 'all' ? 'filter-chip-active' : ''}`}
                   type="button"
-                  onClick={() => setInventoryView('all')}
+                  onClick={() => { setInventoryView('all'); setRecordsPage(1) }}
                 >
                   All records
                   <span>{records.length}</span>
@@ -811,7 +836,7 @@ function App() {
                 <button
                   className={`filter-chip ${inventoryView === 'ipv4' ? 'filter-chip-active' : ''}`}
                   type="button"
-                  onClick={() => setInventoryView('ipv4')}
+                  onClick={() => { setInventoryView('ipv4'); setRecordsPage(1) }}
                 >
                   IPv4
                   <span>{ipv4Count}</span>
@@ -819,7 +844,7 @@ function App() {
                 <button
                   className={`filter-chip ${inventoryView === 'ipv6' ? 'filter-chip-active' : ''}`}
                   type="button"
-                  onClick={() => setInventoryView('ipv6')}
+                  onClick={() => { setInventoryView('ipv6'); setRecordsPage(1) }}
                 >
                   IPv6
                   <span>{ipv6Count}</span>
@@ -827,7 +852,7 @@ function App() {
                 <button
                   className={`filter-chip ${inventoryView === 'mine' ? 'filter-chip-active' : ''}`}
                   type="button"
-                  onClick={() => setInventoryView('mine')}
+                  onClick={() => { setInventoryView('mine'); setRecordsPage(1) }}
                 >
                   Mine
                   <span>{ownCount}</span>
@@ -849,7 +874,7 @@ function App() {
                   </div>
                 ) : null}
 
-                {filteredRecords.map((record) => {
+                {paginatedRecords.map((record) => {
                   const canEdit =
                     superAdmin || record.created_by_user_id === profile.user.id
                   const canDelete = superAdmin
@@ -926,6 +951,15 @@ function App() {
                   )
                 })}
               </div>
+
+              {totalRecordPages > 1 ? (
+                <Pagination
+                  page={safeRecordsPage}
+                  total={totalRecordPages}
+                  onPrev={() => setRecordsPage((p) => Math.max(1, p - 1))}
+                  onNext={() => setRecordsPage((p) => Math.min(totalRecordPages, p + 1))}
+                />
+              ) : null}
             </section>
           </section>
 
@@ -1080,10 +1114,19 @@ function App() {
                   </div>
                 ) : null}
 
-                {dashboard?.events.map((event) => (
+                {paginatedAuditEvents.map((event) => (
                   <AuditTimelineItem key={event.id} event={event} />
                 ))}
               </div>
+
+              {totalAuditPages > 1 ? (
+                <Pagination
+                  page={safeAuditPage}
+                  total={totalAuditPages}
+                  onPrev={() => setAuditPage((p) => Math.max(1, p - 1))}
+                  onNext={() => setAuditPage((p) => Math.min(totalAuditPages, p + 1))}
+                />
+              ) : null}
             </section>
           ) : null}
         </section>
@@ -1443,6 +1486,39 @@ function ToastViewport(props: {
           </button>
         </div>
       ))}
+    </div>
+  )
+}
+
+function Pagination(props: {
+  page: number
+  total: number
+  onPrev: () => void
+  onNext: () => void
+}) {
+  return (
+    <div className="pagination">
+      <button
+        className="pagination-btn"
+        type="button"
+        onClick={props.onPrev}
+        disabled={props.page <= 1}
+        aria-label="Previous page"
+      >
+        ←
+      </button>
+      <span className="pagination-label">
+        {props.page} / {props.total}
+      </span>
+      <button
+        className="pagination-btn"
+        type="button"
+        onClick={props.onNext}
+        disabled={props.page >= props.total}
+        aria-label="Next page"
+      >
+        →
+      </button>
     </div>
   )
 }
